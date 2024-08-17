@@ -1,0 +1,250 @@
+syntax = "proto2";
+
+package dca;
+
+message Order {
+    required string id = 1;
+    required Symbol symbol = 2;
+    required OrderStatus status = 3;
+    required OrderType order_type = 4;
+    required double price = 5;
+    required double avg_price = 6;
+    required double qty = 7;
+    required double filled_qty = 8;
+
+    enum OrderStatus {
+        CREATED = 0;
+        FILLED = 1;
+        PARTIALLY_FILLED = 2;
+        CANCELLED = 3;
+    }
+
+    enum OrderType {
+        MARKET = 0;
+        LIMIT = 1;
+    }
+}
+
+message Symbol {
+    required string base_asset = 1; // Актив, которым мы торгуем
+    required string quote_asset = 2; // Актив, которым мы торгуем
+}
+
+// TODO: maybe rewrite to types, spots don't have a lot of params that futures do. something along the lines of
+// message Spot { enum ExhangeType { BINANCE = 1, BYBIT = 1, ... } }
+// message Futures { enum ExhangeType { BINANCE = 1, ... } }
+// oneof exchange {
+//  required Spot spot = 1;
+//  required Futures futures = 2;
+//  required Paper paper = 3;
+//}
+message Config {
+    required string id = 1; // Уникальный uuid бота, присваивается при каждой новой сделке, получается от основной программы
+    required string botName = 2; // Название бота, произвольная строка
+    required Exchange exchange = 3; // Биржа, на которой мы торгуем (binance/bybit), с указанием рынка (spot/futures)
+    required double commission_maker = 6; // Комиссия биржи за maker сделки (лимитные ордера)
+    required double commission_taker = 7; // Комиссия биржи за taker сделки (маркет ордера)
+    required Symbol symbol = 8;
+    required InitialOrder initialOrder = 11; // Настройки инициирующего ордера
+  //  uint32 leverage = 13; // Плечо с которым ведется сделка, актуально только для futures рынков
+    required Strategy strategy = 14; // Сторона в которую мы торгуем
+   //  Position position = 15; // Режим позиции, только для фьючерсного рынка
+   //  Margin margin = 16; // Тип маржи, только для фьючерсного рынка
+    required Grid grid = 17; // Настройки сетки ордеров
+  //  EqualizeType equalize = 18; // Настройки расторговки
+    required Profit profit = 19; // Настройки профита
+    required Stop stop = 20; // Настройки стоп лосса и безопасного стопа
+
+    message Exchange {
+        required ExchangeType type = 1; // Тип биржы
+        required string apiKey = 2; // Апи ключ
+        required string apiSecret = 3; // Апи секрет
+
+        enum ExchangeType {
+            BINANCE_FUTURES = 0;
+            BINANCE_SPOT = 1;
+            BYBIT_FUTURES = 2;
+            BYBIT_SPOT = 3;
+            BINANCE_FUTURES_PAPER = 4;
+        }
+    }
+
+    message InitialOrder {
+        required double space = 1; // Отступ установки инициирующего ордера от цены на момент запуска бота
+        required double deposit = 2; // Депозит в Quote asset, на сделку, без учета плеча (leverage)
+        required uint32 shiftTimeout = 3; // Таймаут для инициирующего ордера в секундах
+        required double shift = 4; // Процент отклонения цены для перестановки ордера
+    }
+
+    message Profit {
+        message Trailing {
+            required double stop = 1;
+            required double shift = 2;
+        }
+
+        required double value = 1;
+        /// Optional value for trailing, if none set, simple take profit used
+        Trailing trailing = 2;
+    }
+
+
+    enum Strategy {
+        LONG = 0;
+        SHORT = 1;
+    }
+
+    //  enum Position {
+    //    HEDGE = 0;
+    //    ONEWAY = 1;
+    //  }
+
+    //  enum Margin {
+    //    CROSS = 0;
+    //    ISOLATED = 1;
+    //  }
+
+    message Grid {
+        repeated GridOrder orders = 1; // Сеточные ордера
+        required uint32 activeOrders = 2; // Максимальное кол-во ордеров на бирже
+        required EqualizeType equalize = 3; // Настройки расторговки
+
+        message GridOrder {
+            required double step = 1; // Отступ ордера в сетке
+            required double deposit = 2; // Депозит ордера в сетке
+        }
+    }
+
+    message Stop {
+        required double percent = 1; // Процент от цены позиции для стоп лосса
+        required uint32 timeout = 2; // Таймаут для стоп ордера
+//    required double safe_shift = 3; // Перетяжка безопасного стопа
+//    required double safe_from = 4; // Процент от цены позиции для активации безопасного стопа
+//    required string safe_condition = 5; // Условие срабатывания безубытка
+    }
+}
+
+message EqualizeType {
+    // Настройки расторговки
+}
+
+message GetConfigRequest {
+    required string id = 1;
+}
+
+message GetConfigResponse {
+    required Config config = 1;
+}
+
+message LoadConfigRequest {
+    required Config config = 1;
+    required UpdateDelays delays = 2;
+
+    message UpdateDelays {
+        required double pnl_delay = 1; // Delay for PNL updates in seconds.
+        required double grid_delay = 2; // Delay for Grid updates in seconds.
+    }
+}
+
+message ExpressionRequest {
+    required string id = 1;
+    required string expression = 2;
+}
+
+message ExpressionResponse {
+    message GridOrdersExpressions {
+        repeated bool conditions = 1;
+    }
+
+    message ExpressionResult {
+        required string id = 1;
+        required bool result = 2;
+    }
+
+    oneof type {
+        GridOrdersExpressions grid = 1;
+        ExpressionResult result = 2;
+    }
+}
+
+enum Status {
+    // Sent after successful initialization of all streams has been conducted
+    INITIALIZING = 0;
+    // Sent after the initializing order has been filled
+    TRADING = 1;
+    // Sent after trailing trigger has been hit and grid order placement has been stopped
+    TRAILING = 2;
+    // Sent after the worker has fully paused
+    PAUSED = 3;
+    // Sent after the worker has fully resumed
+    RESUMED = 4;
+    // Sent in response to "Terminate" control action or in case something went wrong
+    TERMINATED = 5;
+    // Sent in response to "Terminate" control action only
+    CLOSED = 6;
+}
+
+enum UpdateType {
+    STATUS = 0;
+    PNL = 1;
+    GRID = 2;
+    ORDER = 3;
+    PROFIT = 4;
+}
+
+message SubscribeUpdatesRequest {
+    required string id = 1;
+}
+
+message SubscribeUpdatesResponse {
+    message StatusUpdate {
+        required string id = 1;
+        required Status status = 2;
+        required string reason = 3;
+    }
+
+    message PNLUpdate {
+        required string id = 1;
+        required double pnl = 2;
+    }
+
+    message OrderUpdate {
+        required string id = 1;
+        required Order order = 2;
+    }
+
+    message ProfitReached {
+        required string id = 1;
+        required double profit = 2;
+        required double profit_percent = 3;
+        required double fee = 4;
+    }
+
+    oneof update {
+        StatusUpdate status_update = 1;
+        PNLUpdate pnl_update = 2;
+        OrderUpdate order_update = 3;
+        ProfitReached profit_reached = 4;
+    }
+}
+
+message ControlActionRequest {
+    required ControlAction action = 1;
+
+    enum ControlAction {
+        CLOSE = 0;
+        PAUSE = 1;
+        RESUME = 2;
+        TERMINATE = 3;  // originally panic close
+    }
+}
+
+message Empty {
+}
+
+service DCA {
+    rpc GetConfig (GetConfigRequest) returns (GetConfigResponse) {}
+    rpc LoadConfig (LoadConfigRequest) returns (Empty) {}
+    rpc EvaluateExpression (stream ExpressionResponse) returns (stream ExpressionRequest) {}
+    rpc SubscribeUpdates (SubscribeUpdatesRequest) returns (stream SubscribeUpdatesResponse) {}
+    rpc ControlAction (stream ControlActionRequest) returns (Empty) {}
+}
