@@ -14,7 +14,7 @@ $q.dark.set(true);
 <template>
   <div class="column q-mt-md">
     <json-viewer
-      :value="{ config: props.config }"
+      :value="{ config: props.config, pnl_update_delay: 1000 }"
       :expand-depth="5"
       copyable
       theme="dark"

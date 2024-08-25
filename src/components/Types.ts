@@ -96,5 +96,4 @@ export class Config {
     base_asset: 'BTC',
     quote_asset: 'USDT',
   };
-  pnl_update_delay = 1000;
 }

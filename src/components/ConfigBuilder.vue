@@ -215,11 +215,6 @@ const updateConfig = () => {
       v-model.number="configRef.stop.timeout"
       label="Таймаут стоп лосса, секунд"
     />
-    <span class="text-h6"> Прочие настройки </span>
-    <q-input
-      v-model.number="configRef.pnl_update_delay"
-      label="Частота обновления ПНЛ, миллисекунд"
-    />
   </div>
 </template>
 
