@@ -72,7 +72,7 @@ const trailingShift = ref(0.0005);
 watch(isTrailingActive, (value) => {
   if (value) {
     configRef.value.profit.trailing = {
-      step: trailingStep.value,
+      stop: trailingStep.value,
       shift: trailingShift.value,
     };
   } else {
@@ -82,7 +82,7 @@ watch(isTrailingActive, (value) => {
 
 watch([trailingStep, trailingShift], () => {
   configRef.value.profit.trailing = {
-    step: trailingStep.value,
+    stop: trailingStep.value,
     shift: trailingShift.value,
   };
   updateConfig();
@@ -105,7 +105,7 @@ const newId = () => {
 };
 
 const newName = () => {
-  configRef.value.botName = uniqueNamesGenerator({
+  configRef.value.bot_name = uniqueNamesGenerator({
     dictionaries: [adjectives, animals],
   }).toLowerCase();
 };
@@ -123,7 +123,7 @@ const updateConfig = () => {
         <q-btn round dense flat icon="refresh" @click="newId" />
       </template>
     </q-input>
-    <q-input v-model="configRef.botName" label="Имя Бота">
+    <q-input v-model="configRef.bot_name" label="Имя Бота">
       <template v-slot:after>
         <q-btn round dense flat icon="refresh" @click="newName" />
       </template>
@@ -141,8 +141,8 @@ const updateConfig = () => {
       type="number"
     />
     <q-select v-model="selectedExchange" :options="exchanges" label="Биржа" />
-    <q-input v-model="configRef.exchange.apiKey" label="API Ключ" />
-    <q-input v-model="configRef.exchange.apiSecret" label="API Секрет" />
+    <q-input v-model="configRef.exchange.api_key" label="API Ключ" />
+    <q-input v-model="configRef.exchange.api_secret" label="API Секрет" />
     <span class="text-h6"> Настройки торговли </span>
     <q-input v-model="configRef.symbol.base_asset" label="BASE монета (BTC)" />
     <q-input
@@ -156,19 +156,19 @@ const updateConfig = () => {
     />
     <span class="text-h6"> Настройки инициирующего ордера </span>
     <q-input
-      v-model.number="configRef.initialOrder.deposit"
+      v-model.number="configRef.initial_order.deposit"
       label="Депозит инициирующего ордера"
     />
     <q-input
-      v-model.number="configRef.initialOrder.space"
+      v-model.number="configRef.initial_order.space"
       label="Отступ инициирующего ордера"
     />
     <q-input
-      v-model.number="configRef.initialOrder.shift"
+      v-model.number="configRef.initial_order.shift"
       label="Перетяжка инициирующего ордера"
     />
     <q-input
-      v-model.number="configRef.initialOrder.shiftTimeout"
+      v-model.number="configRef.initial_order.shiftTimeout"
       label="Таймаут инициирующего ордера, секунды"
     />
     <span class="text-h6"> Настройки сетки </span>
@@ -214,6 +214,11 @@ const updateConfig = () => {
     <q-input
       v-model.number="configRef.stop.timeout"
       label="Таймаут стоп лосса, секунд"
+    />
+    <span class="text-h6"> Прочие настройки </span>
+    <q-input
+      v-model.number="configRef.pnl_update_delay"
+      label="Частота обновления ПНЛ, миллисекунд"
     />
   </div>
 </template>

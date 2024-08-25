@@ -8,8 +8,8 @@ export enum ExchangeType {
 
 export type Exchange = {
   type: ExchangeType;
-  apiKey: string;
-  apiSecret: string;
+  api_key: string;
+  api_secret: string;
 };
 
 export type SymbolType = {
@@ -18,10 +18,12 @@ export type SymbolType = {
 };
 
 export type InitialOrder = {
-  space: number;
   deposit: number;
-  shiftTimeout: number;
-  shift: number;
+  shifting: {
+    space: number;
+    shift_timeout: number;
+    shift: number;
+  };
 };
 
 export enum Strategy {
@@ -36,12 +38,11 @@ export type GridOrder = {
 
 export type Grid = {
   activeOrders: number;
-  equalize: object;
   orders: GridOrder[];
 };
 
 export type Trailing = {
-  step: number;
+  stop: number;
   shift: number;
 };
 
@@ -55,29 +56,16 @@ export type Stop = {
 };
 
 export class Config {
-  id = 'abc';
-  botName = 'bot1';
+  bot_name = 'bot1';
   commission_maker = 0.001;
   commission_taker = 0.005;
   exchange: Exchange = {
     type: ExchangeType.BYBIT_SPOT,
-    apiKey: '1234321',
-    apiSecret: '432234',
-  };
-  symbol: SymbolType = {
-    base_asset: 'BTC',
-    quote_asset: 'USDT',
-  };
-  strategy: Strategy = Strategy.LONG;
-  initialOrder: InitialOrder = {
-    deposit: 100,
-    space: 0.0001,
-    shiftTimeout: 100,
-    shift: 0.0001,
+    api_key: '1234321',
+    api_secret: '432234',
   };
   grid: Grid = {
     activeOrders: 1,
-    equalize: {},
     orders: [
       { deposit: 15, step: 0.005 },
       { deposit: 30, step: 0.01 },
@@ -86,6 +74,16 @@ export class Config {
       { deposit: 120, step: 0.04 },
     ],
   };
+  id = 'abc';
+  initial_order: InitialOrder = {
+    deposit: 100,
+    shifting: {
+      space: 0.0001,
+      shift_timeout: 100,
+      shift: 0.0001,
+    },
+  };
+
   profit: Profit = {
     value: 0.01,
   };
@@ -93,4 +91,10 @@ export class Config {
     percent: 0,
     timeout: 0,
   };
+  strategy: Strategy = Strategy.LONG;
+  symbol: SymbolType = {
+    base_asset: 'BTC',
+    quote_asset: 'USDT',
+  };
+  pnl_update_delay = 1000;
 }
