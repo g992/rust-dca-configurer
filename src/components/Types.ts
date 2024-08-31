@@ -37,7 +37,7 @@ export type GridOrder = {
 };
 
 export type Grid = {
-  activeOrders: number;
+  active_orders: number;
   orders: GridOrder[];
 };
 
@@ -65,7 +65,7 @@ export class Config {
     api_secret: '432234',
   };
   grid: Grid = {
-    activeOrders: 1,
+    active_orders: 1,
     orders: [
       { deposit: 15, step: 0.005 },
       { deposit: 30, step: 0.01 },

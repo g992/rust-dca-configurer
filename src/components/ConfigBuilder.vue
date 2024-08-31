@@ -160,21 +160,21 @@ const updateConfig = () => {
       label="Депозит инициирующего ордера"
     />
     <q-input
-      v-model.number="configRef.initial_order.space"
+      v-model.number="configRef.initial_order.shifting.space"
       label="Отступ инициирующего ордера"
     />
     <q-input
-      v-model.number="configRef.initial_order.shift"
+      v-model.number="configRef.initial_order.shifting.shift"
       label="Перетяжка инициирующего ордера"
     />
     <q-input
-      v-model.number="configRef.initial_order.shiftTimeout"
+      v-model.number="configRef.initial_order.shifting.shift_timeout"
       label="Таймаут инициирующего ордера, секунды"
     />
     <span class="text-h6"> Настройки сетки </span>
 
     <q-input
-      v-model.number="configRef.grid.activeOrders"
+      v-model.number="configRef.grid.active_orders"
       label="Максимум активных ордеров"
     />
     <q-input v-model.number="gridOrdersCount" label="Всего сеточных ордеров" />
