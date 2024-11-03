@@ -3,14 +3,28 @@ import { Config } from 'components/Types';
 import { onMounted, ref, watch } from 'vue';
 import { v4 } from 'uuid';
 import {
-  uniqueNamesGenerator,
   adjectives,
   animals,
+  uniqueNamesGenerator,
 } from 'unique-names-generator';
 
 const emit = defineEmits<{ updateConfig: [config: Config] }>();
 const configRef = ref<Config>(new Config());
 const props = defineProps<{ config: Config }>();
+
+onMounted(() => {
+  const configStr = localStorage.getItem('config');
+  if (!configStr) return;
+  try {
+    configRef.value = JSON.parse(configStr);
+  } catch (e) {
+    console.error('Parsing config error', e);
+  }
+});
+
+watch(configRef, (value) => {
+  localStorage.setItem('config', JSON.stringify(value));
+});
 
 setTimeout(() => {
   gridOrdersCount.value = configRef.value.grid.orders.length;
