@@ -1,6 +1,6 @@
 {
   "name": "rust-dca-configurer",
-  "version": "0.0.3",
+  "version": "0.0.4",
   "description": "DCA Bot Config Builder",
   "productName": "Rust DCA Configurer",
   "author": "G992 <pvapvpa2014@yandex.ru>",
