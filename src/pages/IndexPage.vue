@@ -1,7 +1,7 @@
 <template>
   <q-page class="row justify-evenly">
     <div class="col-5">
-      <ConfigBuilder @updateConfig="updateConfig" :config="config" />
+      <ConfigBuilder @updateConfig="updateConfig" />
     </div>
     <div class="col-5"><ConfigViewer :config="config" /></div>
   </q-page>

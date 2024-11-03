@@ -10,21 +10,54 @@ import {
 
 const emit = defineEmits<{ updateConfig: [config: Config] }>();
 const configRef = ref<Config>(new Config());
-const props = defineProps<{ config: Config }>();
+// const props = defineProps<{ config: Config }>();
 
 onMounted(() => {
   const configStr = localStorage.getItem('config');
   if (!configStr) return;
   try {
     configRef.value = JSON.parse(configStr);
+    console.log(JSON.parse(configStr));
+    if (configRef.value.exchange.type === 2)
+      selectedExchange.value = {
+        label: 'ByBit FUTURES',
+        value: 2,
+      };
+
+    if (configRef.value.exchange.type === 3)
+      selectedExchange.value = {
+        label: 'ByBit SPOT',
+        value: 3,
+      };
+
+    if (configRef.value.strategy === 0)
+      selectedStrategy.value = { label: 'Long', value: 0 };
+    if (configRef.value.strategy === 1)
+      selectedStrategy.value = { label: 'Short', value: 1 };
+
+    if (configRef.value.profit.trailing) isTrailingActive.value = true;
   } catch (e) {
     console.error('Parsing config error', e);
   }
 });
 
-watch(configRef, (value) => {
-  localStorage.setItem('config', JSON.stringify(value));
-});
+let updateConfigInLSTimeout = 0;
+const updateConfigInLS = (config: Config) => {
+  window.clearTimeout(updateConfigInLSTimeout);
+  updateConfigInLSTimeout = window.setTimeout(
+    () => localStorage.setItem('config', JSON.stringify(config)),
+    300
+  );
+};
+
+watch(
+  configRef,
+  (value) => {
+    console.log('Updating config');
+    updateConfigInLS(value);
+  },
+  { deep: true }
+);
 
 setTimeout(() => {
   gridOrdersCount.value = configRef.value.grid.orders.length;
@@ -32,10 +65,10 @@ setTimeout(() => {
 
 const exchanges = [
   { label: 'ByBit SPOT', value: 3 },
-  {
-    label: 'ByBit FUTURES',
-    value: 2,
-  },
+  // {
+  //   label: 'ByBit FUTURES',
+  //   value: 2,
+  // },
 ];
 
 const selectedExchange = ref({
@@ -110,9 +143,9 @@ watch(
   { deep: true }
 );
 
-onMounted(() => {
-  configRef.value = props.config;
-});
+// onMounted(() => {
+//   configRef.value = props.config;
+// });
 
 const newId = () => {
   configRef.value.id = v4();
